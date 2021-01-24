@@ -1,0 +1,12 @@
+[core]
+	      editor = emacs
+[alias]
+        ss = status
+        c = commit
+        sl = log --graph --oneline --all --decorate
+        ls = log --pretty=format:"%C(yellow)%h%Cred%d\\ %Creset%s%Cblue\\ [%cn]" --decorate
+[filter "lfs"]
+	      smudge = git-lfs smudge -- %f
+	      process = git-lfs filter-process
+	      required = true
+	      clean = git-lfs clean -- %f
