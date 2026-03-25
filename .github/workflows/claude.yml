@@ -47,5 +47,5 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr:*)'
-          allowed_tools: "Edit,Read,Write,Bash(git:*),Bash(gh:*)"
+          allowed_tools: "Bash,Edit,Write,Read,Glob,Grep,mcp__github_comment__update_claude_comment,Write(.bashrc)"
 
