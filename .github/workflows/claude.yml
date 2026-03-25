@@ -19,11 +19,11 @@ jobs:
       (github.event_name == 'issues' && (contains(github.event.issue.body, '@claude') || contains(github.event.issue.title, '@claude')))
     runs-on: ubuntu-latest
     permissions:
-      contents: read
-      pull-requests: read
+      contents: write
+      pull-requests: write
       issues: read
       id-token: write
-      actions: read # Required for Claude to read CI results on PRs
+      actions: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -47,5 +47,4 @@ jobs:
           # See https://github.com/anthropics/claude-code-action/blob/main/docs/usage.md
           # or https://code.claude.com/docs/en/cli-reference for available options
           # claude_args: '--allowed-tools Bash(gh pr:*)'
-          allowed_tools: "Bash,Edit,Write,Read,Glob,Grep,mcp__github_comment__update_claude_comment,Write(.bashrc)"
-
+          allowed_tools: "Bash,Edit,Write,Read,Glob,Grep,mcp__github_comment__update_claude_comment,Edit(.bashrc),Write(.bashrc)"
