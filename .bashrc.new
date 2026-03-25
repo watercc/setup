@@ -1,0 +1,243 @@
+# ~/.bashrc - Bash configuration file
+# Cross-platform (Linux/macOS) shell configuration
+
+# ============================================================
+#   GENERAL SETTINGS
+# ============================================================
+
+# If not running interactively, do nothing
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+
+shopt -s cdspell
+shopt -s checkwinsize
+shopt -s globstar 2>/dev/null
+
+# ============================================================
+#   HISTORY
+# ============================================================
+
+HISTCONTROL=ignoreboth
+HISTSIZE=10000
+HISTFILESIZE=20000
+shopt -s histappend
+HISTTIMEFORMAT="%F %T "
+
+# ============================================================
+#   PROMPT
+# ============================================================
+
+git_branch() {
+    git branch 2>/dev/null | grep '\*' | sed 's/\* //'
+}
+
+git_prompt() {
+    local branch
+    branch=$(git_branch)
+    [ -n "$branch" ] && echo " (${branch})"
+}
+
+PS1="\[\033[0;32m\]\u@\h\[\033[0m\]:\[\033[0;34m\]\w\[\033[0;33m\]\$(git_prompt)\[\033[0m\]\$ "
+
+# ============================================================
+#   NAVIGATION
+# ============================================================
+
+alias ..='cd ../'
+alias ...='cd ../../'
+alias .3='cd ../../../'
+alias .4='cd ../../../../'
+alias .5='cd ../../../../../'
+alias .6='cd ../../../../../../'
+
+mcd() { mkdir -p "$1" && cd "$1"; }
+
+# ============================================================
+#   LISTING
+# ============================================================
+
+if ls --color=auto /dev/null 2>/dev/null; then
+    alias ls='ls --color=auto'
+    alias ll='ls -lAhF --color=auto'
+    alias la='ls -A --color=auto'
+else
+    alias ls='ls -G'
+    alias ll='ls -lAhFG'
+    alias la='ls -AG'
+fi
+
+alias lr='ls -R | grep ":$" | sed -e '\''s/:$//'\'' -e '\''s/[^-][^\/]*\//--/g'\'' -e '\''s/^/   /'\'' -e '\''s/-/|/'\'' | less'
+
+# ============================================================
+#   FILE OPERATIONS
+# ============================================================
+
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias mkdir='mkdir -pv'
+alias less='less -FSRXc'
+alias c='clear'
+alias grep='grep --color=auto'
+alias fgrep='fgrep --color=auto'
+alias egrep='egrep --color=auto'
+
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    trash() { command mv "$@" ~/.Trash; }
+else
+    trash() { mkdir -p ~/.local/share/Trash/files && command mv "$@" ~/.local/share/Trash/files/; }
+fi
+
+alias dud='du -d 1 -h'
+alias duf='du -sh *'
+
+# ============================================================
+#   SEARCH & FIND
+# ============================================================
+
+alias qfind="find . -name"
+ff()  { /usr/bin/find . -name "$@"; }
+ffs() { /usr/bin/find . -name "$@"'*'; }
+ffe() { /usr/bin/find . -name '*'"$@"; }
+
+# ============================================================
+#   ARCHIVE EXTRACTION
+# ============================================================
+
+extract() {
+    if [ -f "$1" ]; then
+        case "$1" in
+            *.tar.bz2)  tar xjf "$1"     ;;
+            *.tar.gz)   tar xzf "$1"     ;;
+            *.tar.xz)   tar xJf "$1"     ;;
+            *.bz2)      bunzip2 "$1"     ;;
+            *.rar)      unrar e "$1"     ;;
+            *.gz)       gunzip "$1"      ;;
+            *.tar)      tar xf "$1"      ;;
+            *.tbz2)     tar xjf "$1"     ;;
+            *.tgz)      tar xzf "$1"     ;;
+            *.zip)      unzip "$1"       ;;
+            *.Z)        uncompress "$1"  ;;
+            *.7z)       7z x "$1"        ;;
+            *)     echo "'$1' cannot be extracted via extract()" ;;
+        esac
+    else
+        echo "'$1' is not a valid file"
+    fi
+}
+
+# ============================================================
+#   GIT
+# ============================================================
+
+alias g='git'
+alias gs='git status'
+alias ga='git add'
+alias gaa='git add --all'
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gl='git log --oneline --graph --decorate --all'
+alias gp='git push'
+alias gpl='git pull'
+alias gf='git fetch --all --prune'
+alias gb='git branch'
+alias gba='git branch -a'
+alias gst='git stash'
+alias gstp='git stash pop'
+alias grb='git rebase'
+alias gm='git merge'
+alias gt='git tag'
+
+# ============================================================
+#   PROCESS & SYSTEM
+# ============================================================
+
+my_ps() { ps "$@" -u "$USER" -o pid,%cpu,%mem,start,time,command; }
+
+alias memHogsPs='ps aux --sort=-%mem | head -10'
+alias cpu_hogs='ps aux --sort=-%cpu | head -10'
+alias df='df -h'
+alias du='du -h'
+alias openPorts='sudo ss -tulnp'
+alias netCons='sudo ss -tunp'
+
+findPid() { pgrep "$@"; }
+killnamed() { kill "$(pgrep "$1")"; }
+
+# ============================================================
+#   NETWORKING
+# ============================================================
+
+alias myip='curl -s https://api.ipify.org && echo'
+alias myip6='curl -s https://api64.ipify.org && echo'
+alias localip="hostname -I | awk '{print \$1}'"
+alias lsock='sudo ss -tulnp'
+alias lsockU='sudo ss -tulnp | grep udp'
+alias lsockT='sudo ss -tulnp | grep tcp'
+
+# ============================================================
+#   PYTHON
+# ============================================================
+
+alias py='python3'
+alias pip='pip3'
+venv() { python3 -m venv "${1:-.venv}"; }
+
+activate() {
+    local venv_dir
+    for venv_dir in .venv venv env; do
+        if [ -f "$venv_dir/bin/activate" ]; then
+            source "$venv_dir/bin/activate"
+            return
+        fi
+    done
+    echo "No virtual environment found (.venv, venv, or env)"
+}
+
+# ============================================================
+#   DOCKER
+# ============================================================
+
+alias dk='docker'
+alias dkc='docker compose'
+alias dkps='docker ps'
+alias dkpsa='docker ps -a'
+alias dki='docker images'
+alias dkrm='docker rm'
+alias dkrmi='docker rmi'
+alias dkprune='docker system prune -f'
+
+# ============================================================
+#   MISC UTILITIES
+# ============================================================
+
+alias h='history'
+alias j='jobs -l'
+alias now='date +"%Y-%m-%d %H:%M:%S"'
+alias week='date +%V'
+alias reload='source ~/.bashrc'
+
+mkd() { mkdir -p "$@" && cd "$_"; }
+serve() { python3 -m http.server "${1:-8000}"; }
+lspath() { echo "$PATH" | tr ':' '\n'; }
+
+# ============================================================
+#   COMPLETION
+# ============================================================
+
+if [ -f /usr/share/bash-completion/bash_completion ]; then
+    . /usr/share/bash-completion/bash_completion
+elif [ -f /etc/bash_completion ]; then
+    . /etc/bash_completion
+fi
+
+# ============================================================
+#   LOCAL OVERRIDES
+# ============================================================
+
+[ -f ~/.bashrc.local ] && source ~/.bashrc.local
